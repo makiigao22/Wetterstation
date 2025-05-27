@@ -29,7 +29,17 @@ Es wurde eine Wetterstation realisiert, die über Sensoren
 - Temperatur & Luftfeuchtigkeit (DHT11)  
 - Magnetfeldstärke (Hall-TTL-Sensor)
 
-misst. Die Daten werden auf einem Webinterface angezeigt, ergänzt durch einen einfachen Graphen zur historischen Darstellung sowie durch ein lokales OLED-Display. Weitere Features wie Sleep-Mode, Status-LED-Steuerung und ein Wi-Fi-Manager wurden implementiert.
+misst. Die Daten werden auf einem Webinterface angezeigt, ergänzt durch einen einfachen Graphen zur historischen Darstellung sowie durch ein lokalen OLED-Display. Weitere Features wie Sleep-Mode, Status-LED-Steuerung und ein Wi-Fi-Manager wurden implementiert.
+
+### Webinterface
+
+![Webinterface der Wetterstation](images/webseite.jpg)  
+*Screenshot der responsiven Weboberfläche mit aktuellem Diagramm und Werten.*
+
+### Hardwareaufbau
+
+![Aufbau auf dem Breadboard](images/image.png)  
+*Foto des Breadboard-Aufbaus mit DHT11, Hall-Sensor, OLED und NeoPixel.*
 
 ---
 
@@ -46,7 +56,7 @@ erforderlich. Zum Einsatz kamen folgende Komponenten:
 - **DHT11** – digitaler Sensor für Temperatur und Luftfeuchtigkeit  
 - **Hall-Sensor (TTL-Ausgang)** – Erkennung magnetischer Felder  
 - **ESP32-C3 DevKitM1** – Mikrocontroller mit integriertem WLAN und Sleep-Mode  
-- **OLED-Display (SSD1306, 0,96" 128×64)** – lokale Anzeige der Messwerte  
+- **OLED-Display (SSD1306, 0,96″ 128×64)** – lokale Anzeige der Messwerte  
 - **RGB-LED (NeoPixel)** – Statusanzeige für Verbindung, Messung, Grenzwertwarnung  
 - **Chart.js** im Webinterface – Darstellung historischer Mittelwerte  
 
@@ -57,7 +67,7 @@ Die Visualisierung historischer Daten basiert auf der Aggregation von Intervalle
 ## Arbeitsschritte
 
 1. **Komponenten prüfen & aufbauen**  
-   - DHT11 an GPIO 2 (mit 10kΩ Pull-Up)  
+   - DHT11 an GPIO 2 (mit 10 kΩ Pull-Up)  
    - OLED-Display über Software-I²C (SDA=GPIO 1, SCL=GPIO 10)  
    - Hall-Sensor an GPIO 3 (analogRead für feine Werte)  
    - NeoPixel-LED an GPIO 8  
@@ -82,7 +92,7 @@ Die Visualisierung historischer Daten basiert auf der Aggregation von Intervalle
    - **Zeit:** NTP-Sync über `configTime()`  
    - **Sensor-Loop:**  
      - Mittelwerte aus 5 Messungen (je 100 ms Pause)  
-     - Ausreißer­filterung  
+     - Ausreißerfilterung  
    - **Display:**  
      - Uhrzeit, Temperatur, Luftfeuchte, Hall-Wert auf OLED  
    - **Webinterface:**  
@@ -107,7 +117,7 @@ Es wurde eine voll funktionsfähige Wetterstation auf Basis eines ESP32-C3 Mikro
 - über Webinterface aktuelle und historische Daten ausliefert  
 - eine per Web steuerbare Status-LED besitzt  
 
-Alle Komponenten arbeiten zuverlässig zusammen. Die aggregierte Darstellung historischer Daten und der WiFiManager-Fallback erhöhen Benutzerfreundlichkeit und Robustheit. Die Dokumentation und der modulare Code­aufbau ermöglichen einfachen Nachbau und Erweiterung.
+Alle Komponenten arbeiten zuverlässig zusammen. Die aggregierte Darstellung historischer Daten und der WiFiManager-Fallback erhöhen Benutzerfreundlichkeit und Robustheit. Die Dokumentation und der modulare Codeaufbau ermöglichen einfachen Nachbau und Erweiterung.
 
 ---
 
