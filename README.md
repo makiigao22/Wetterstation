@@ -1,167 +1,123 @@
-```markdown
-# Wetterstation mit ESP32-C3
+# Wetterstation SYT & ITP
 
-**Projekt:** SYT & ITP Wetterstation  
 **Datum:** 27. Mai 2025  
 **Verfasser:** Maik Gao & Marcel Hofmann  
 
 ---
 
-## Inhaltsverzeichnis
+## Inhalt
 
 1. [Einführung](#einführung)  
 2. [Projektbeschreibung](#projektbeschreibung)  
-3. [Hardware](#hardware)  
-4. [Software & Bibliotheken](#software--bibliotheken)  
-5. [Installation & Aufbau](#installation--aufbau)  
-6. [Konfiguration](#konfiguration)  
-7. [Verwendung](#verwendung)  
-8. [Theoretische Grundlagen](#theoretische-grundlagen)  
-9. [Code-Übersicht](#code-übersicht)  
-10. [Zusammenfassung](#zusammenfassung)  
-11. [Literaturverzeichnis](#literaturverzeichnis)  
+3. [Theorie](#theorie)  
+4. [Arbeitsschritte](#arbeitsschritte)  
+5. [Zusammenfassung](#zusammenfassung)  
+6. [Literaturverzeichnis](#literaturverzeichnis)  
 
 ---
 
 ## Einführung
 
-Dieses Projekt realisiert eine voll funktionale Wetterstation auf Basis eines ESP32-C3 Mikrocontrollers. Erfasst werden Temperatur, Luftfeuchtigkeit und Magnetfeldstärke. Die Sensordaten werden auf einem lokalen OLED-Display angezeigt und über ein Webinterface (mit Chart.js) visualisiert. Eine RGB-Status-LED kann per Webinterface gesteuert werden.
+Im Rahmen dieses Projekts wurde eine einfache Wetterstation auf Basis des ESP32 entwickelt. Ziel war es, Umweltdaten wie Temperatur, Luftfeuchtigkeit und Magnetfeldstärke zu erfassen und über ein Webinterface darzustellen. Zusätzlich wurde das Projekt um zahlreiche Funktionen erweitert, um praktische Anwendungsmöglichkeiten zu demonstrieren und die Arbeit mit Mikrocontrollern praxisnah zu vertiefen.
 
 ---
 
 ## Projektbeschreibung
 
-- **Sensoren**  
-  - DHT11: Temperatur & Luftfeuchtigkeit  
-  - Hall-Sensor (TTL/analog): Magnetfeldstärke  
+Es wurde eine Wetterstation realisiert, die über Sensoren
 
-- **Anzeige & Steuerung**  
-  - OLED-Display (0,96″, 128×64) für lokale Darstellung  
-  - Webinterface (ESPAsyncWebServer + Chart.js) für Live- und historische Daten  
-  - RGB-LED (Neopixel) per Webinterface schaltbar  
+- Temperatur & Luftfeuchtigkeit (DHT11)  
+- Magnetfeldstärke (Hall-TTL-Sensor)
 
-- **Funktionen**  
-  - Messintervalle (je 10 s) und Mittelwertbildung (5 Einzelmessungen)  
-  - Ausreißererkennung  
-  - Sleep Mode (Energiesparen)  
-  - Wi-Fi-Manager für flexible WLAN-Anbindung  
-  - NTP-Zeitsynchronisation  
+misst. Die Daten werden auf einem Webinterface angezeigt, ergänzt durch einen einfachen Graphen zur historischen Darstellung sowie durch ein lokales OLED-Display. Weitere Features wie Sleep-Mode, Status-LED-Steuerung und ein Wi-Fi-Manager wurden implementiert.
 
 ---
 
-## Hardware
+## Theorie
 
-| Komponente            | Typ/Modell                    | Anschluss am ESP32-C3      |
-|-----------------------|-------------------------------|----------------------------|
-| Mikrocontroller       | ESP32-C3 DevKitM1             | —                          |
-| Temperatur/Feuchte    | DHT11                         | Daten → GPIO 2, 3.3 V, GND |
-| Hall-Sensor           | TTL-/Analog-Hall              | Signal → GPIO 3, 3.3 V, GND|
-| OLED-Display          | SSD1306 128×64                | SDA → GPIO 1, SCL → GPIO 10|
-| RGB-LED (Neopixel)    | Adafruit NeoPixel (1 LED)     | Daten → GPIO 8             |
-| Steckbrett & Kabel    | Jumperkabel, USB-Mini-Kabel   | —                          |
+Für die Umsetzung dieses Projekts ist grundlegendes Wissen über
 
----
+- Sensorik  
+- Web-Server-Programmierung auf Mikrocontrollern  
+- Energieeffiziente Datenverarbeitung  
 
-## Software & Bibliotheken
+erforderlich. Zum Einsatz kamen folgende Komponenten:
 
-- **Arduino IDE** (ESP32-Boardpaket von Espressif)  
-- **Bibliotheken**  
-  - DHT sensor library & Adafruit Unified Sensor  
-  - U8g2 (OLED-Anzeige)  
-  - Adafruit NeoPixel  
-  - ESPAsyncWebServer & AsyncTCP  
-  - WiFiManager  
-  - Chart.js (im Webinterface)  
+- **DHT11** – digitaler Sensor für Temperatur und Luftfeuchtigkeit  
+- **Hall-Sensor (TTL-Ausgang)** – Erkennung magnetischer Felder  
+- **ESP32-C3 DevKitM1** – Mikrocontroller mit integriertem WLAN und Sleep-Mode  
+- **OLED-Display (SSD1306, 0,96" 128×64)** – lokale Anzeige der Messwerte  
+- **RGB-LED (NeoPixel)** – Statusanzeige für Verbindung, Messung, Grenzwertwarnung  
+- **Chart.js** im Webinterface – Darstellung historischer Mittelwerte  
+
+Die Visualisierung historischer Daten basiert auf der Aggregation von Intervallen (z. B. Durchschnittswerte alle 5 Minuten), um Speicherbedarf und Ladezeiten gering zu halten. Der Wi-Fi-Manager erlaubt eine flexible WLAN-Verbindung oder das Aufspannen eines Access-Points über das AsyncWebServer-Modul.
 
 ---
 
-## Installation & Aufbau
+## Arbeitsschritte
 
-1. **Hardware verdrahten**  
-   - Siehe Tabelle „Hardware“  
-   - Pull-Up (10 kΩ) am DHT11-Datenpin  
+1. **Komponenten prüfen & aufbauen**  
+   - DHT11 an GPIO 2 (mit 10kΩ Pull-Up)  
+   - OLED-Display über Software-I²C (SDA=GPIO 1, SCL=GPIO 10)  
+   - Hall-Sensor an GPIO 3 (analogRead für feine Werte)  
+   - NeoPixel-LED an GPIO 8  
 
-2. **Arduino IDE einrichten**  
-   - Board-Manager: „ESP32 by Espressif Systems“  
-   - Bibliotheks-Manager: oben genannte Bibliotheken installieren  
+2. **Entwicklungsumgebung einrichten**  
+   - Arduino IDE mit ESP32-C3-Boardpaket  
+   - Installation benötigter Bibliotheken:  
+     - DHT sensor library & Adafruit Unified Sensor  
+     - U8g2 für OLED  
+     - Adafruit NeoPixel  
+     - ESPAsyncWebServer, AsyncTCP  
+     - WiFiManager  
 
-3. **Sketch hochladen**  
-   - öffnen: `Wetterstation.ino`  
-   - Board → ESP32C3 Dev Module  
-   - COM-Port wählen → Hochladen  
+3. **Einzeltests**  
+   - DHT11 → Temperatur/Luftfeuchte auf Serial Monitor  
+   - OLED → Textausgabe mit U8g2  
+   - NeoPixel → Farbwechsel  
+   - Hall-Sensor → analoges Auslesen, Wertevergleich mit Magnet  
 
----
+4. **Hauptcode entwickeln**  
+   - **WLAN-Setup:** WiFiManager mit Access-Point-Fallback  
+   - **Zeit:** NTP-Sync über `configTime()`  
+   - **Sensor-Loop:**  
+     - Mittelwerte aus 5 Messungen (je 100 ms Pause)  
+     - Ausreißer­filterung  
+   - **Display:**  
+     - Uhrzeit, Temperatur, Luftfeuchte, Hall-Wert auf OLED  
+   - **Webinterface:**  
+     - HTML/CSS/JS in Raw-String  
+     - AJAX-Polling alle 5 s → JSON-Endpoint `/data`  
+     - Chart.js-Diagramm für historischen Verlauf  
+     - LED-Toggle über GET `/led?state=on|off`  
 
-## Konfiguration
-
-- Beim ersten Start öffnet ESP32 im AP-Modus `ESP_Config`  
-- WLAN-Zugangsdaten über Captive Portal eingeben  
-- Nach erfolgreicher Verbindung: NTP-Zeitbezug (`pool.ntp.org`)  
-
----
-
-## Verwendung
-
-1. **Webinterface aufrufen**  
-   - IP-Adresse (im seriellen Monitor ersichtlich) in Browser eingeben  
-2. **Live-Daten & Graph**  
-   - Aktuelle Sensorwerte  
-   - Historisches Liniendiagramm (letzte 10 Minuten)  
-3. **LED steuern**  
-   - Checkbox „Status-LED“ toggeln → per GET-Request `/led?state=on|off`  
-
----
-
-## Theoretische Grundlagen
-
-- **Sensorik & Datenaggregation**  
-  - Mittelwerte (je 5 Messungen) zur Reduktion von Ausreißern  
-  - Speicherung in Arrays (max. 50 Datenpunkte)  
-
-- **Webserver-Programmierung**  
-  - Asynchroner Webserver (ESPAsyncWebServer)  
-  - AJAX-Polling (alle 5 s) für JSON-Datenendpunkt  
-
-- **Energieeffizienz**  
-  - Sleep Mode des ESP32 zur Stromersparnis  
-  - Display-Updates und Messintervalle optimiert  
-
----
-
-## Code-Übersicht
-
-- **Setup**  
-  - `WiFiManager autoConnect()` → Captive Portal  
-  - `configTime()` → NTP  
-  - `setupWebServer()` → Routing für `/` (HTML) und `/data` (JSON)  
-
-- **Loop**  
-  - `analogRead(HALLPIN)`  
-  - `averageTemperature()`, `averageHumidity()`  
-  - LED-Farbsteuerung je nach Temperatur  
-  - Display-Update (1 s) & Messung (10 s)  
-  - Historische Datenpflege (Ringpuffer)  
-
-> **Hinweis:** Den vollständigen Sketch finden Sie im Ordner `src/` als `Wetterstation.ino`.
+5. **Integration & Tests**  
+   - Zusammenführen aller Module in einem Sketch  
+   - Langzeittest (> Stunden) auf Stabilität  
+   - Überprüfung auf PC & Smartphone  
 
 ---
 
 ## Zusammenfassung
 
-Dieses Projekt zeigt den kompletten Workflow von der Hardware-Auswahl über Sensorintegration bis hin zur Web-Visualisierung. Alle Komponenten lassen sich mit Grundkenntnissen der Arduino-IDE und Mikrocontrollerprogrammierung nachbauen und erweitern.
+Es wurde eine voll funktionsfähige Wetterstation auf Basis eines ESP32-C3 Mikrocontrollers realisiert, die
+
+- Temperatur, Luftfeuchtigkeit und Magnetfeldstärke erfasst  
+- Messwerte lokal auf OLED darstellt  
+- über Webinterface aktuelle und historische Daten ausliefert  
+- eine per Web steuerbare Status-LED besitzt  
+
+Alle Komponenten arbeiten zuverlässig zusammen. Die aggregierte Darstellung historischer Daten und der WiFiManager-Fallback erhöhen Benutzerfreundlichkeit und Robustheit. Die Dokumentation und der modulare Code­aufbau ermöglichen einfachen Nachbau und Erweiterung.
 
 ---
 
 ## Literaturverzeichnis
 
-1. Arduino – DHT11 Tutorial. *Arduino Getting Started.*  
-2. Chart.js Dokumentation. *W3Schools.*  
-3. ESP32 OLED Tutorial. *esp32io.com.*  
-4. Random Nerd Tutorials – ESP32 & DHT11.  
-5. Tiago. ESP32-C3 Super Mini RTClock mit OLED.  
-6. ESPAsyncWebServer. GitHub.  
-7. tzapu/WiFiManager. GitHub.  
-8. Random Nerd Tutorials – WiFiManager & AsyncWebServer.  
-
----
-```
+1. Arduino – **DHT11 | Arduino Tutorial**, Arduino Getting Started. Abgerufen 27. Mai 2025. https://arduinogetstarted.com/tutorials/arduino-dht11  
+2. **Chart.js**, W3Schools. Abgerufen 27. Mai 2025. https://www.w3schools.com/js/js_graphics_chartjs.asp  
+3. **ESP32 – OLED**, ESP32IO Tutorial. Abgerufen 27. Mai 2025. https://esp32io.com/tutorials/esp32-oled  
+4. Santos, S. – **ESP32 with DHT11/DHT22 Temperature and Humidity Sensor**, Random Nerd Tutorials. Abgerufen 27. Mai 2025. https://randomnerdtutorials.com/esp32-dht11-dht22-temperature-humidity-sensor-arduino-ide/  
+5. Tiago – **ESP32-C3 Super Mini Real-Time Clock with OLED Display**, EdgeMicroTech. Abgerufen 27. Mai 2025. https://www.edgemicrotech.com/esp32-c3-super-mini-real-time-clock-with-oled-display/  
+6. **ESPAsyncWebServer**, GitHub. Abgerufen 27. Mai 2025. https://github.com/ESP32Async/ESPAsyncWebServer  
+7. **WiFiManager**, GitHub. Abgerufen 27. Mai 2025. https://github.com/tzapu/WiFiManager  
+8. **Random Nerd Tutorials – Wifimanager**, Abgerufen 27. März 2025. https://randomnerdtutorials.com/esp32-wi-fi-manager-asyncwebserver/  
